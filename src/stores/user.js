@@ -6,7 +6,12 @@ export const UserStore = defineStore("user", {
     loading: false,
     item: {},
     items: [],
-    credentials: {},
+    credentials: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+    me: {},
     isLoggedIn: false,
     baseURL: "/users",
   }),
@@ -21,7 +26,8 @@ export const UserStore = defineStore("user", {
             return;
           }
 
-          this.afterLogin(response.data);
+          this.afterLogin(response.data.data.token);
+          this.me = response.data.data.user;
           if (cb) cb();
         })
         .catch((error) => console.error(error))
@@ -29,7 +35,7 @@ export const UserStore = defineStore("user", {
     },
     afterLogin(token) {
       api.defaults.headers.authorization = `Bearer ${token}`;
-      if (process.env.CLIENT) localStorage.setItem("token", token);
+      if (process.env.CLIENT) localStorage.setItem("token", JSON.stringify(token));
       this.isLoggedIn = true;
     },
     getItems(cb) {
@@ -48,5 +54,12 @@ export const UserStore = defineStore("user", {
         .catch((error) => console.error(error))
         .finally(() => (this.loading = false));
     },
+    logout(cb) {
+      if (process.env.CLIENT) localStorage.removeItem("token");
+      this.me = {};
+      this.isLoggedIn = false;
+      delete api.defaults.headers.authorization;
+      if (cb) cb();
+    }
   },
 });
