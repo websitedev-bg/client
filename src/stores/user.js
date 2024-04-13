@@ -34,9 +34,13 @@ export const UserStore = defineStore("user", {
         .finally(() => (this.loading = false));
     },
     afterLogin(token) {
-      api.defaults.headers.authorization = `Bearer ${token}`;
+      this.saveAuthorizationHeader(token);
       if (process.env.CLIENT) localStorage.setItem("token", JSON.stringify(token));
       this.isLoggedIn = true;
+      this.getUser();
+    },
+    saveAuthorizationHeader(token) {
+      api.defaults.headers.authorization = `Bearer ${token}`;
     },
     getItems(cb) {
       this.loading = true;
@@ -52,6 +56,25 @@ export const UserStore = defineStore("user", {
           if (cb) cb();
         })
         .catch((error) => console.error(error))
+        .finally(() => (this.loading = false));
+    },
+    getUser(cb) {
+      this.loading = true;
+      api
+        .get(`${this.baseURL}`)
+        .then((response) => {
+          if (response.status !== 200) {
+            console.log(response.data);
+            return;
+          }
+
+          this.me = response.data.data;
+          if (cb) cb(response);
+        })
+        .catch((error) => {
+          if (cb) cb(error);
+          console.error(error);
+        })
         .finally(() => (this.loading = false));
     },
     logout(cb) {

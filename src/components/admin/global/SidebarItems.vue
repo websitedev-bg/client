@@ -171,12 +171,20 @@
     <q-item-section>Услуги</q-item-section>
   </q-item>
 
-  <q-item clickable v-ripple @click="$router.push({ name: `settings` })">
-    <q-item-section avatar>
-      <q-icon name="settings" />
-    </q-item-section>
-    <q-item-section>Настройки</q-item-section>
-  </q-item>
+  <q-expansion-item icon="settings" label="Настройки">
+    <q-card class="pl-5">
+      <q-item
+        clickable
+        v-ripple
+        @click="$router.push({ name: `settings` })"
+      >
+        <q-item-section avatar>
+          <q-icon name="person" />
+        </q-item-section>
+        <q-item-section>Моят профил</q-item-section>
+      </q-item>
+    </q-card>
+  </q-expansion-item>
 
   <q-item clickable v-ripple class="text-red-500">
     <q-item-section avatar>

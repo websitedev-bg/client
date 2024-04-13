@@ -22,7 +22,9 @@
     </transition>
 
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <component :is="Component" />
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
@@ -32,8 +34,6 @@ import { useRouter } from "vue-router";
 
 import { EnvStore } from "stores/env";
 import { UserStore } from "stores/user";
-
-import { api } from "src/boot/axios";
 
 import NavbarTop from "src/components/admin/global/NavbarTop.vue";
 import SidebarItems from "src/components/admin/global/SidebarItems.vue";
@@ -49,10 +49,29 @@ export default {
     const user = UserStore();
     const router = useRouter();
 
-    const token = api.defaults.headers.authorization;
+    const token = JSON.parse(localStorage.getItem("token"));
+
+    const callbacks = {
+      getUser(response) {
+        if (response.status !== 200) {
+          user.logout();
+        } else {
+          router
+            .push({ name: "dashboard" })
+            .then(() => callbacks.afterNavigate());
+        }
+      },
+      afterNavigate() {
+        user.afterLogin(token);
+        env.drawers.left = true;
+      },
+    };
 
     if (!token) {
       router.push({ name: "login" }).then(() => (env.dialogs.login = true));
+    } else {
+      user.saveAuthorizationHeader(token);
+      user.getUser(callbacks.getUser);
     }
 
     return { env, user };
