@@ -45,7 +45,7 @@ export const UserStore = defineStore("user", {
     getItems(cb) {
       this.loading = true;
       api
-        .get(`${this.baseURL}`)
+        .get(`${this.baseURL}/index`)
         .then((response) => {
           if (response.status !== 200) {
             console.log(response.data);
